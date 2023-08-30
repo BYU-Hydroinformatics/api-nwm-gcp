@@ -24,7 +24,7 @@ SECURITY AND IMAGE REPO:
 - Image repository: none
 
 Google API Gateway:
-Composed by YAML config file and gateways. It puts all the different Cloud Functions in a common entrance gate (API) and it requests end-user to enter a valid API key. API Gateway also takes variables entered by the end-user and take them to the Cloud Function invoked by the GET request. 
+Composed by YAML config file and gateways. It puts all the different Cloud Functions in a single place (API) and it requests end-user to enter a valid API key for validation. API Gateway also receives variables entered by the end-user and takes them to the Cloud Function invoked by the GET request. 
 
 Service Account:
 function-to-bigquery@nwm-ciroh.iam.gserviceaccount.com is set up to access both BigQuery from Cloud Function and Cloud Function from API Gateway. Permissions: BigQuery Job User & Cloud Run Invoked
