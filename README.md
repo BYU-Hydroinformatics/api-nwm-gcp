@@ -8,19 +8,23 @@ INITIAL SETUP:
 - Trigger: HTTPS / Require authentication (Manage authorized users with Cloud IAM)
 - Region: us-central1
 - Programming language: Python 3.9
-  RUNTIME:
+
+RUNTIME:
 - Memory allocated: 256 MB
 - CPU: 0.167
 - Timeout: 60
 - Concurrency: 1
 - Autoscaling: 0-100
 - Runtime service account: function-to-bigquery@nwm-ciroh.iam.gserviceaccount.com
-  BUILD:
+
+BUILD:
 - Default
-  CONNECTIONS:
+
+CONNECTIONS:
 - Ingress settings: Allow all traffic
 - Egress settings: None
-  SECURITY AND IMAGE REPO:
+
+SECURITY AND IMAGE REPO:
 - Encryption: Google-managed encryption key
 - Image repository: none
 
