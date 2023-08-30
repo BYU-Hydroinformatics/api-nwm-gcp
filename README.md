@@ -3,7 +3,8 @@ REST API backed by National Water Model data, developed on Google Cloud Platform
 
 Google Cloud Function (2nd Gen):
 Each Cloud Function (CF) corresponds to one GET gate set up through API Gateway. Each CF contains a main.py file and a requirements.txt file, and its basic settings are:
-  INITIAL SETUP:
+
+INITIAL SETUP:
 - Trigger: HTTPS / Require authentication (Manage authorized users with Cloud IAM)
 - Region: us-central1
 - Programming language: Python 3.9
