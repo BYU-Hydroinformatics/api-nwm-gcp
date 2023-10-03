@@ -38,15 +38,17 @@ Service Account:
 function-to-bigquery@nwm-ciroh.iam.gserviceaccount.com is set up to access both BigQuery from Cloud Function and Cloud Function from API Gateway. Permissions: BigQuery Job User & Cloud Run Invoked
 
 --------------------------------
-Example calls (Google Cloud Shell):
+Example of currently functional calls (Google Cloud Shell):
 
 ->Interacting with Cloud Function:
 
-curl -m 70 -X GET https://us-central1-nwm-ciroh.cloudfunctions.net/forecastrecords_1?featureID=[**Insert featureID**] \
+curl -m 70 -X GET https://us-central1-nwm-ciroh.cloudfunctions.net/forecastrecords_1?featureID={feature_id} \
 -H "Authorization: bearer $(gcloud auth print-identity-token)" \
 
 ->Interacting with API Gateway:
 
-curl -X GET "https://api-gateway-get2-9f6idmxh.uc.gateway.dev/forecastrecords?featureID=[**Insert featureID**]" -H "x-api-key: [**Insert API Key**]"
+curl -X GET "https://api-gateway-get2-9f6idmxh.uc.gateway.dev/forecastrecords?featureID={feature_id}" -H "x-api-key: {API Key}"
 
-curl -X GET "https://api-gateway-get2-9f6idmxh.uc.gateway.dev/dailyaverages?featureID=[**Insert featureID**]" -H "x-api-key: [**Insert API Key**]"
+curl -X GET "https://api-gateway-get2-9f6idmxh.uc.gateway.dev/dailyaverages?featureID={feature_id}" -H "x-api-key: {API Key}"
+
+curl -X GET "https://long-range-forecast-9f6idmxh.uc.gateway.dev/forecast_records?feature_id={feature_id}&start_date={start_date}&end_date={end_date}&reference_time={reference_time}&ensemble={ensemble} -H "x-api-key: {API Key}"
