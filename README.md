@@ -42,13 +42,24 @@ Example of currently functional calls (Google Cloud Shell):
 
 ->Interacting with Cloud Function:
 
-curl -m 70 -X GET https://us-central1-nwm-ciroh.cloudfunctions.net/forecastrecords_1?featureID={feature_id} \
+-- Retroactive Forecast:
+Syntax:
+curl -m 550 -X GET "https://us-central1-nwm-ciroh.cloudfunctions.net/retroactive_forecast_records?feature_id=[feature_id]&start_date=[start_date]&end_date=[end_date]&reference_time=[reference_time]&ensemble=[ensemble]" \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+Example:
+curl -m 550 -X GET "https://us-central1-nwm-ciroh.cloudfunctions.net/retroactive_forecast_records?feature_id=12068774&start_date=2023-04-04&end_date=2023-04-10&reference_time=2023-03-25T00:00:00&ensemble=0" \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+
+-- Geometry Data:
+Syntax:
+curl -m 550 -X GET "https://us-central1-nwm-ciroh.cloudfunctions.net/geometry?coordinates=[[coord1],[...],[coordN],[coord1]]]" \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+Example:
+curl -m 70 -X GET "https://us-central1-nwm-ciroh.cloudfunctions.net/geometry?coordinates=%5B%5B40.280599,-111.613889%5D,%5B40.219656,-111.614364%5D,%5B40.241428,-111.704668%5D,%5B40.280599,-111.613889%5D%5D" \
 -H "Authorization: bearer $(gcloud auth print-identity-token)" \
 
 ->Interacting with API Gateway:
 
-curl -X GET "https://api-gateway-get2-9f6idmxh.uc.gateway.dev/forecastrecords?featureID={feature_id}" -H "x-api-key: {API Key}"
+curl -H "x-api-key: [Api_key]" "https://retroactive-and-coordinates-9f6idmxh.uc.gateway.dev/geometry?coordinates=%5B%5B40.280599,-111.613889%5D,%5B40.219656,-111.614364%5D,%5B40.241428,-111.704668%5D,%5B40.280599,-111.613889%5D%5D"
 
-curl -X GET "https://api-gateway-get2-9f6idmxh.uc.gateway.dev/dailyaverages?featureID={feature_id}" -H "x-api-key: {API Key}"
-
-curl -X GET "https://long-range-forecast-9f6idmxh.uc.gateway.dev/forecast_records?feature_id={feature_id}&start_date={start_date}&end_date={end_date}&reference_time={reference_time}&ensemble={ensemble} -H "x-api-key: {API Key}"
+curl -H "x-api-key: [Api_key]" "https://api1-9f6idmxh.uc.gateway.dev/retroactive_forecast_records?feature_id=12068774&start_date=2023-04-04&end_date=2023-04-10&reference_time=2023-03-25T00:00:00&ensemble=0"
