@@ -63,3 +63,41 @@ curl -m 70 -X GET "https://us-central1-nwm-ciroh.cloudfunctions.net/geometry?coo
 curl -H "x-api-key: [Api_key]" "https://retroactive-and-coordinates-9f6idmxh.uc.gateway.dev/geometry?coordinates=%5B%5B40.280599,-111.613889%5D,%5B40.219656,-111.614364%5D,%5B40.241428,-111.704668%5D,%5B40.280599,-111.613889%5D%5D"
 
 curl -H "x-api-key: [Api_key]" "https://api1-9f6idmxh.uc.gateway.dev/retroactive_forecast_records?feature_id=12068774&start_date=2023-04-04&end_date=2023-04-10&reference_time=2023-03-25T00:00:00&ensemble=0"
+
+
+## Deployment
+
+This section goes over provisioning and deploying the Cloud Functions using terraform. There are a few steps...before beginning make sure you have the [terraform CLI installed](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) and the [gcloud CLI installed](https://cloud.google.com/sdk/docs/install)
+
+
+1. Login with [gcloud application default credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev) so terraform can run authenticated commands within your cloud environment:
+
+```
+gcloud auth application-default login
+```
+
+2. Update the variables in `deployment.tfvars` file with the correct information 
+
+3. Initialize terraform config:
+
+```
+terraform init
+```
+
+4. [Optional] Preview the plan for deployment:
+
+```
+terraform plan -var-file="deployment.tfvars"
+```
+
+5. Deploy the infrastructure and Cloud Functions 🚀 :
+
+```
+terraform apply -var-file="deployment.tfvars"
+```
+
+6. [Optional] If you ever need to tear down the cloud infrastructure then you can remove everything and clean-up using the following command:
+
+```
+terraform destroy -var-file="deployment.tfvars"
+```
