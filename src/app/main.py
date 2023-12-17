@@ -50,8 +50,9 @@ def forecast_records(
         """
         latest_reference_time_result = run_query(latest_reference_time_query)
 
-        # get the latest reference_time
-        reference_time = latest_reference_time_query[-1]['latest_reference_time']
+        # Iterate over the results to get the latest reference_time
+        for row in latest_reference_time_result:
+            reference_time = row['latest_reference_time']
 
     else:
         # Convert the input reference_time string to a datetime object
@@ -162,9 +163,129 @@ def forecast_records(
 
 
 @app.get("/geometry")
-def geometry(reach_id, lat, lon):
+def geometry(
+    comids: str | None = None,
+    hydroshare_id: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
+    output_format: str = 'json'
+):
+    # Validate input combinations
+    if comids:
+        # If comids are provided, use them
+        station_ids = comids.split(',')
+        hydroshare_id = None
+        lat = None
+        lon = None
 
-    return
+        # Construct the BigQuery query to select specific columns with a JOIN statement
+        query = f"""
+            SELECT *
+            FROM 
+                `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS a
+            JOIN 
+                `nwm-ciroh.NWM_Streams_Tables.Routelink_CONUS_fsspec` AS b
+            ON 
+                a.station_id = b.to
+            WHERE 
+                a.station_id IN ({", ".join(map(str, station_ids))})
+            ORDER BY 
+                a.station_id
+        """
+
+    elif hydroshare_id:
+        # If hydroshare_id is provided, fetch comids from HydroShare
+        hydroshare_url = f"https://www.hydroshare.org/resource/{hydroshare_id}/data/contents/nwm_comids.json"
+        try:
+            hydroshare_response = requests.get(hydroshare_url)
+            hydroshare_data = hydroshare_response.json()
+        except Exception as e:
+            return f"Error retrieving HydroShare data: {str(e)}"
+
+        station_ids = [item.get('comid') for item in hydroshare_data]
+
+        if not station_ids:
+            raise HTTPException(status_code=500, description="No feature IDs found in HydroShare data.")
+
+        # Construct the BigQuery query to select specific columns with a JOIN statement
+        query = f"""
+            SELECT *
+            FROM 
+                `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS a
+            JOIN 
+                `nwm-ciroh.NWM_Streams_Tables.Routelink_CONUS_fsspec` AS b
+            ON 
+                a.station_id = b.to
+            WHERE 
+                a.station_id IN ({", ".join(map(str, station_ids))})
+            ORDER BY 
+                a.station_id
+        """
+    
+    elif lat and lon:
+        # If lat and lon are provided, find the closest 'to' using Haversine formula
+        query = f"""
+        WITH DistanceCalc AS (
+            SELECT
+                b.*,
+                # Haversine formula to calculate distance
+                ACOS(SIN({lat} * 0.0174533) * SIN(b.lat * 0.0174533) +
+                    COS({lat} * 0.0174533) * COS(b.lat * 0.0174533) *
+                    COS((b.lon - {lon}) * 0.0174533)) * 6371 AS distance
+            FROM 
+                `nwm-ciroh.NWM_Streams_Tables.Routelink_CONUS_fsspec` AS b
+        ),
+        ClosestTo AS (
+            SELECT *
+            FROM DistanceCalc
+            ORDER BY distance
+            LIMIT 1
+        )
+        SELECT *
+        FROM 
+            `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS a
+        JOIN 
+            ClosestTo AS c
+        ON 
+            a.station_id = c.link
+    """
+
+    else:
+        # If none of the input combinations match, return an error
+        raise HTTPException(status_code=400, description='Please provide either "comids", "hs_resource", or (lat and lon) query parameters.')
+
+    # Make API request to BigQuery and retrieve data
+    results = run_query(query)
+
+    # Create a list of JSON objects with the selected columns
+    response_json = []
+    for row in results:
+        # Convert the BigQuery Row object to a dictionary
+        json_obj = dict(row.items())
+        response_json.append(json_obj)
+
+    # Check the output format and return the corresponding response
+    if output_format.lower() == 'json':
+        # Return results as a JSON response
+        response = json.dumps(response_json)
+
+    elif output_format.lower() == 'csv':
+        # Return results as a CSV response
+        csv_output = StringIO()
+        csv_writer = csv.DictWriter(csv_output, fieldnames=response_json[0].keys())
+
+        # Write header
+        csv_writer.writeheader()
+
+        # Write rows
+        csv_writer.writerows(response_json)
+
+        response = csv_output.getvalue()
+
+    else:
+        raise HTTPException(status_code=400, description='Unsupported output format. Supported formats are JSON and CSV.')
+
+    return response
 
 
 def run_query(query):
