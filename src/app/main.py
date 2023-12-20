@@ -26,8 +26,8 @@ def home():
     return RedirectResponse("/docs")
 
 
-@app.get("/forecast-records")
-def forecast_records(
+@app.get("/forecast")
+def forecast(
     forecast_type: str,
     reference_time: str | None = None,
     comids: str | None = None,
