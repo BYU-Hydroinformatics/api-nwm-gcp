@@ -20,6 +20,7 @@ FORECAST_OPTS = dict(
 
 app = FastAPI()
 
+
 @app.get("/")
 def home():
     return RedirectResponse("/docs")
@@ -60,27 +61,11 @@ def forecast_records(
             reference_time = parser.parse(reference_time)
 
         except ValueError as e:
-            raise HTTPException(status_code=400, description=f"Error parsing reference_time: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Error parsing reference_time: {str(e)}")
 
-    # If hydroshare_id is provided, use it to retrieve comids
-    if hydroshare_id:
-        hydroshare_url = f"https://www.hydroshare.org/resource/{hydroshare_id}/data/contents/nwm_comids.json"
-        try:
-            hydroshare_response = requests.get(hydroshare_url)
-            hydroshare_data = hydroshare_response.json()
-            # Extract comids from the HydroShare data
-            comids = [item.get('comid') for item in hydroshare_data]
-            
-        except Exception as e:
-            raise HTTPException(status_code=500, description=f"Error retrieving HydroShare data: {str(e)}")
-        
-    elif comids:
-        # If comids is provided, split by comma
-        comids = list(map(int, comids.split(','))) if comids else None
-
-    else:
-        raise HTTPException(status_code=400, description="No valid comids found. Please provide valid comids or a valid HydroShare resource ID.")
-
+    # Extract comids from either the comid or hydroshare_id input
+    comids = extract_comid_input(comids, hydroshare_id)
+    
     # If ensemble is provided, split by comma
     ensembles = list(map(int, ensemble.split(','))) if ensemble else None
 
@@ -112,7 +97,13 @@ def forecast_records(
     else:
         # If ensemble(s) is specified, use them in the query
         query = f"""
-            SELECT *
+            SELECT 
+                feature_id,
+                reference_time,
+                time,
+                ensemble,
+                streamflow,
+                velocity
             FROM 
                 `{table_name}`
             WHERE 
@@ -139,28 +130,69 @@ def forecast_records(
 
         response_data.append(json_obj)
 
-    # Check the output format and return the corresponding response
-    if output_format.lower() == 'json':
-        # Return results as a JSON response
-        response = json.dumps(response_data)
-    
-    elif output_format.lower() == 'csv':
-        # Return results as a CSV response
-        csv_output = StringIO()
-        csv_writer = csv.DictWriter(csv_output, fieldnames=response_data[0].keys())
-
-        # Write header
-        csv_writer.writeheader()
-
-        # Write rows
-        csv_writer.writerows(response_data)
-
-        response = csv_output.getvalue()
-    else:
-        raise HTTPException(status_code=400, description='Unsupported output format. Supported formats are JSON and CSV.')
+    response = format_response(response_data, output_format)
     
     return response
 
+
+@app.get("/analysis-assim")
+def analysis_assim(
+    start_time: str | None = None,
+    end_time: str | None = None,
+    comids: str | None = None,
+    hydroshare_id: str | None = None,
+    output_format: str = 'json',
+    run_offset: int = 1,
+):
+    
+    # Extract comids from either the comid or hydroshare_id input
+    comids = extract_comid_input(comids, hydroshare_id)
+
+    if run_offset not in range(1,4):
+        raise HTTPException(status_code=400, detail=f"Invalid run_offset. Supported values are 1, 2, and 3.")
+    
+    if start_time is None:
+        start_time = "2018-09-17T00:00:00"
+
+    if end_time is None:
+        end_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+    query = f"""
+        SELECT
+            feature_id,
+            time,
+            streamflow,
+            velocity
+        FROM
+            `ciroh-water-demo.national_water_model_demo.channel_rt_analysis_assim`
+        WHERE 
+            feature_id IN ({", ".join(map(str, comids))})
+            AND forecast_offset = {run_offset}
+            AND time >= '{start_time}'
+            AND time <= '{end_time}'
+        ORDER BY 
+            time
+    """
+
+    # Make API request to BigQuery and retrieve data
+    results = run_query(query)
+
+     # Create a list of JSON objects with the selected columns
+    response_data = []
+    for row in results:
+        # Convert the BigQuery Row object to a dictionary
+        json_obj = dict(row.items())
+
+        # Convert datetime objects to string
+        for key, value in json_obj.items():
+            if isinstance(value, datetime):
+                json_obj[key] = value.strftime("%Y-%m-%dT%H:%M:%S")
+
+        response_data.append(json_obj)
+
+    response = format_response(response_data, output_format)
+
+    return response
 
 @app.get("/geometry")
 def geometry(
@@ -205,7 +237,7 @@ def geometry(
         station_ids = [item.get('comid') for item in hydroshare_data]
 
         if not station_ids:
-            raise HTTPException(status_code=500, description="No feature IDs found in HydroShare data.")
+            raise HTTPException(status_code=500, detail="No feature IDs found in HydroShare data.")
 
         # Construct the BigQuery query to select specific columns with a JOIN statement
         query = f"""
@@ -252,38 +284,19 @@ def geometry(
 
     else:
         # If none of the input combinations match, return an error
-        raise HTTPException(status_code=400, description='Please provide either "comids", "hs_resource", or (lat and lon) query parameters.')
+        raise HTTPException(status_code=400, detail='Please provide either "comids", "hs_resource", or (lat and lon) query parameters.')
 
     # Make API request to BigQuery and retrieve data
     results = run_query(query)
 
     # Create a list of JSON objects with the selected columns
-    response_json = []
+    response_data = []
     for row in results:
         # Convert the BigQuery Row object to a dictionary
         json_obj = dict(row.items())
-        response_json.append(json_obj)
+        response_data.append(json_obj)
 
-    # Check the output format and return the corresponding response
-    if output_format.lower() == 'json':
-        # Return results as a JSON response
-        response = json.dumps(response_json)
-
-    elif output_format.lower() == 'csv':
-        # Return results as a CSV response
-        csv_output = StringIO()
-        csv_writer = csv.DictWriter(csv_output, fieldnames=response_json[0].keys())
-
-        # Write header
-        csv_writer.writeheader()
-
-        # Write rows
-        csv_writer.writerows(response_json)
-
-        response = csv_output.getvalue()
-
-    else:
-        raise HTTPException(status_code=400, description='Unsupported output format. Supported formats are JSON and CSV.')
+    response = format_response(response_data, output_format)
 
     return response
 
@@ -291,9 +304,57 @@ def geometry(
 def run_query(query):
     # Set up BigQuery client
     client = bigquery.Client()
+    job_config = bigquery.QueryJobConfig(use_query_cache=True)
 
     # Make API request to BigQuery and retrieve data
-    query_job = client.query(query)
+    query_job = client.query(query, job_config=job_config)
     results = query_job.result()
 
     return results
+
+
+def extract_comid_input(comids: str | None , hydroshare_id: str | None):
+
+    # If hydroshare_id is provided, use it to retrieve comids
+    if hydroshare_id:
+        hydroshare_url = f"https://www.hydroshare.org/resource/{hydroshare_id}/data/contents/nwm_comids.json"
+        try:
+            hydroshare_response = requests.get(hydroshare_url)
+            hydroshare_data = hydroshare_response.json()
+            # Extract comids from the HydroShare data
+            comids = [item.get('comid') for item in hydroshare_data]
+            
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error retrieving HydroShare data: {str(e)}")
+        
+    elif comids:
+        # If comids is provided, split by comma
+        comids = list(map(int, comids.split(','))) if comids else None
+
+    else:
+        raise HTTPException(status_code=400, detail="No valid comids found. Please provide valid comids or a valid HydroShare resource ID.")
+    
+    return comids
+
+def format_response(response_data, output_format):
+    # Check the output format and return the corresponding response
+    if output_format.lower() == 'json':
+        # Return results as a JSON response
+        response = json.dumps(response_data)
+    
+    elif output_format.lower() == 'csv':
+        # Return results as a CSV response
+        csv_output = StringIO()
+        csv_writer = csv.DictWriter(csv_output, fieldnames=response_data[0].keys())
+
+        # Write header
+        csv_writer.writeheader()
+
+        # Write rows
+        csv_writer.writerows(response_data)
+
+        response = csv_output.getvalue()
+    else:
+        raise HTTPException(status_code=400, detail='Unsupported output format. Supported formats are JSON and CSV.')
+    
+    return response
