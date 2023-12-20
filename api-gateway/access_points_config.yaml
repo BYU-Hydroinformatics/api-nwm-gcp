@@ -1,25 +1,50 @@
 swagger: '2.0'
 info:
   title: NWM Streams API
-  description: Retrieves data from NWM Streams Database based on given parameters
+  description: Retrieves data from NWM Dataset based on given parameters
   version: 1.0.0
 schemes:
   - https
 produces:
   - application/json
 paths:
-  /forecastrecords:
+  /forecast:
     get:
-      summary: Get table contents
-      operationId: return_forecastrecords
+      summary: Get forecast table contents
+      operationId: return_forecast_records
       x-google-backend:
-        address: https://us-central1-nwm-ciroh.cloudfunctions.net/forecastrecords_1
+        address: <APP-URL>forecast
       parameters:
-        - name: "featureID"
+        - name: "forecast_type"
+          in: "query"
+          description: "Forecast table to retrive data from"
+          required: true
+          type: "string"
+        - name: "comids"
           in: "query"
           description: "Unique identification for stream segment"
           required: true
           type: "number"
+        - name: "hs_resource"
+          in: "query"
+          description: "Unique identification for HydroShare resource (with list of comids)"
+          required: true
+          type: "number"
+        - name: "reference_time"
+          in: "query"
+          description: "Time in which forecast was generated"
+          required: true
+          type: "string"
+        - name: "ensemble"
+          in: "query"
+          description: "One or more different ensembles"
+          required: true
+          type: "number"
+        - name: "output_format"
+          in: "query"
+          description: "Output format. Options are csv and json"
+          required: true
+          type: "string"
       security:
         - api_key: []
       responses:
@@ -39,20 +64,45 @@ paths:
           description: "Internal Server Error"
           schema:
             type: string
-  /dailyaverages:
+  /analysis-assim:
     get:
-      summary: Get table contents
-      operationId: return_dailyaverages
+      summary: Get analysis and assimilation table contents
+      operationId: return_analysis-assim_records
       x-google-backend:
-        address: https://us-central1-nwm-ciroh.cloudfunctions.net/dailyaverages_1
+        address: <APP-URL>analysis-assim
       parameters:
-        - name: "featureID"
+        - name: "start_time"
+          in: "query"
+          description: "Start time of analysis and assimilation data"
+          required: true
+          type: "string"
+        - name: "end_time"
+          in: "query"
+          description: "End time of analysis and assimilation data"
+          required: true
+          type: "string"
+        - name: "comids"
           in: "query"
           description: "Unique identification for stream segment"
           required: true
           type: "number"
+        - name: "hs_resource"
+          in: "query"
+          description: "Unique identification for HydroShare resource (with list of comids)"
+          required: true
+          type: "number"
+        - name: "run_offset"
+          in: "query"
+          description: "Look back time from model run"
+          required: true
+          type: "string"
+        - name: "output_format"
+          in: "query"
+          description: "Output format. Options are csv and json"
+          required: true
+          type: "string"
       security:
-        - api_key: [ ]
+        - api_key: []
       responses:
         "200":
           description: "Successful retrieval of data"
@@ -81,4 +131,3 @@ definitions:
     properties:
       featureID:
         type: "number"
-
