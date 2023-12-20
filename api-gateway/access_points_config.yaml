@@ -8,12 +8,34 @@ schemes:
 produces:
   - application/json
 paths:
+  /docs:
+    get:
+      summary: Documentation for NWM Streams API
+      operationId: docs
+      x-google-backend:
+        address: <APP-URL>/docs
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
+  /openapi.json:
+    get:
+      summary: openapi.json for NWM Streams API
+      operationId: openapi-json
+      x-google-backend:
+        address: <APP-URL>/openapi.json
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
   /forecast:
     get:
       summary: Get forecast table contents
       operationId: return_forecast_records
       x-google-backend:
-        address: <APP-URL>forecast
+        address: <APP-URL>/forecast
       parameters:
         - name: "forecast_type"
           in: "query"
@@ -69,7 +91,7 @@ paths:
       summary: Get analysis and assimilation table contents
       operationId: return_analysis-assim_records
       x-google-backend:
-        address: <APP-URL>analysis-assim
+        address: <APP-URL>/analysis-assim
       parameters:
         - name: "start_time"
           in: "query"
