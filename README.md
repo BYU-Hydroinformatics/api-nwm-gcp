@@ -101,3 +101,33 @@ terraform apply -var-file="deployment.tfvars"
 ```
 terraform destroy -var-file="deployment.tfvars"
 ```
+
+
+## Cloud Run deployment
+
+1. Create Artifact Registry Repo
+
+```
+gcloud artifacts repositories create nwm-api-repo --location us-central1 --repository-format docker --async
+```
+
+2. Build the Docker Image
+
+```
+cd src/ # must be in the src/ subdirectory
+gcloud builds submit --config cloudbuild.yaml
+```
+
+3. Deploy to Cloud Run
+
+```
+gcloud run deploy nwm-api \
+--image=<ARTIFACT_REGISTRY_IMAGE> \
+--region us-central1 \
+--memory=512Mi \
+--cpu=1 \
+--min-instances=0 \
+--max-instances=10 \
+--timeout=30s \
+--service-account=<SERVICE_ACCOUNT>
+```
