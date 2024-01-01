@@ -13,7 +13,7 @@ paths:
       summary: Documentation for NWM Streams API
       operationId: docs
       x-google-backend:
-        address: <APP-URL>/docs
+        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/docs
       responses:
         '200':
           description: A successful response
@@ -24,7 +24,7 @@ paths:
       summary: openapi.json for NWM Streams API
       operationId: openapi-json
       x-google-backend:
-        address: <APP-URL>/openapi.json
+        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/openapi.json
       responses:
         '200':
           description: A successful response
@@ -35,7 +35,7 @@ paths:
       summary: Get forecast table contents
       operationId: return_forecast_records
       x-google-backend:
-        address: <APP-URL>/forecast
+        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/forecast
       parameters:
         - name: "forecast_type"
           in: "query"
@@ -91,7 +91,7 @@ paths:
       summary: Get analysis and assimilation table contents
       operationId: return_analysis-assim_records
       x-google-backend:
-        address: <APP-URL>/analysis-assim
+        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/analysis-assim
       parameters:
         - name: "start_time"
           in: "query"

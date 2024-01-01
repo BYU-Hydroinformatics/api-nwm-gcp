@@ -5,10 +5,8 @@ from io import StringIO
 import json
 import requests
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.openapi.utils import get_openapi
 from google.cloud import bigquery
 from typing import Union
@@ -23,9 +21,6 @@ FORECAST_OPTS = dict(
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-templates = Jinja2Templates(directory="app/templates")
 
 def custom_openapi():
     if app.openapi_schema:
@@ -37,7 +32,7 @@ def custom_openapi():
         description = (
             "This API provides access to data produced by the National Water Model.\n"
             "It includes endpoints for retrieving retrospective and forecast data.\n "
-            "Users can filter data by location, time, and other parameters.\n"
+            "Users can filter data by locaqtion, time, and other parameters.\n"
             "Please refer to the individual endpoint documentation for more details on how to use each function."
         ),
         routes=app.routes,
@@ -65,7 +60,24 @@ def forecast(
     ensemble: str | None = None,
     output_format: str = 'json',
 ):
-    """Test docs for the forecast endpoint.
+    """Retrieve analysis assimilation data from the National Water Model based on the provided parameters.
+
+    Args:
+        forecast_type (str): The forecast run to extract data from.
+        reference_time (str, optional): The reference time for the forecast.
+            If None then defaults to the latest available forecast reference time 
+            in specified table. Defaults to None.
+        comids (str, optional): A comma-separated list of comids for the forecast. 
+            Defaults to None.
+        hydroshare_id (str, optional): The hydroshare id with specified comids to
+            extractt the forecast. If comids is not provided, this will be used 
+            to extract comids. Defaults to None.
+        ensemble (str, optional): A comma-separated list of ensembles for the forecast. 
+            If None then the average of all available ensembles will be taken. Defaults to None.
+        output_format (str, optional): The output format for the forecast. Defaults to 'json'.
+
+    Returns:
+        The forecast data in the specified output format.
     """
 
     # Select the appropriate table based on the "type" parameter
@@ -176,7 +188,30 @@ def analysis_assim(
     output_format: str = 'json',
     run_offset: int = 1,
 ):
+    """
+    Retrieves analysis assimilation data from the National Water Model for the specified parameters.
+
     
+    Args:
+
+        start_time (str | None): The start time of the data range. If None, defaults to "2018-09-17T00:00:00".
+            Defaults to None.
+        end_time (str | None): The end time of the data range. If None, defaults to the current time.
+            Defaults to None.
+        comids (str, optional): A comma-separated list of comids for the forecast. 
+            Defaults to None.
+        hydroshare_id (str, optional): The hydroshare id with specified comids to
+            extract the forecast. If comids is not provided, this will be used 
+            to extract comids. Defaults to None.
+        output_format (str): The format of the response data. Defaults to 'json'.
+        run_offset (int): The analysis_assim result time offset. Supported values are 1, 2, and 3. Defaults to 1.
+
+    Returns:
+
+        The analysis_assim data in the specified output format.
+
+    """
+
     # Extract comids from either the comid or hydroshare_id input
     comids = extract_comid_input(comids, hydroshare_id)
 

@@ -1,4 +1,38 @@
 steps:
+# Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image', '.' ]
-images: ['us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image']
+  args: 
+  - 'build'
+  - '-t'
+  - 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+  - '.'
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: 
+  - 'push'
+  - 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+  - 'run'
+  - 'deploy'
+  - 'nwm-api-service'
+  - '--image'
+  - 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+  - '--region'
+  - 'us-central1'
+  - '--memory'
+  - '512Mi' 
+  - '--cpu'
+  - '1' 
+  - '--min-instances'
+  - '0' 
+  - '--max-instances'
+  - '10' 
+  - '--timeout'
+  - '30s'
+  - '--service-account'
+  - 'nwm-api-controller@kmarkert-personal.iam.gserviceaccount.com'
+images:
+- 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
