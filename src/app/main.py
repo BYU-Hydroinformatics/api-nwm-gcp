@@ -5,8 +5,11 @@ from io import StringIO
 import json
 import requests
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.openapi.utils import get_openapi
 from google.cloud import bigquery
 from typing import Union
 
@@ -20,6 +23,33 @@ FORECAST_OPTS = dict(
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+templates = Jinja2Templates(directory="app/templates")
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="National Water Model API Documentation",
+        version="0.1.0",
+        summary="This is the OpenAPI schema for the National Water Model API.",
+        description = (
+            "This API provides access to data produced by the National Water Model.\n"
+            "It includes endpoints for retrieving retrospective and forecast data.\n "
+            "Users can filter data by location, time, and other parameters.\n"
+            "Please refer to the individual endpoint documentation for more details on how to use each function."
+        ),
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 @app.get("/")
 def home():
@@ -35,6 +65,8 @@ def forecast(
     ensemble: str | None = None,
     output_format: str = 'json',
 ):
+    """Test docs for the forecast endpoint.
+    """
 
     # Select the appropriate table based on the "type" parameter
     if forecast_type in FORECAST_OPTS.keys():
@@ -313,7 +345,7 @@ def run_query(query):
     return results
 
 
-def extract_comid_input(comids: str | None , hydroshare_id: str | None):
+def extract_comid_input(comids: str | None, hydroshare_id: str | None):
 
     # If hydroshare_id is provided, use it to retrieve comids
     if hydroshare_id:
