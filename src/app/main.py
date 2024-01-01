@@ -324,30 +324,14 @@ def geometry(
     elif lat and lon:
         # If lat and lon are provided, find the closest 'to' using Haversine formula
         query = f"""
-        WITH DistanceCalc AS (
             SELECT
-                b.*,
-                # Haversine formula to calculate distance
-                ACOS(SIN({lat} * 0.0174533) * SIN(b.lat * 0.0174533) +
-                    COS({lat} * 0.0174533) * COS(b.lat * 0.0174533) *
-                    COS((b.lon - {lon}) * 0.0174533)) * 6371 AS distance
-            FROM 
-                `nwm-ciroh.NWM_Streams_Tables.Routelink_CONUS_fsspec` AS b
-        ),
-        ClosestTo AS (
-            SELECT *
-            FROM DistanceCalc
+                streams.*,    
+                ST_DISTANCE(streams.geometry, ST_GEOGPOINT({lon}, {lat})) AS distance
+            FROM
+                `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS streams
             ORDER BY distance
             LIMIT 1
-        )
-        SELECT *
-        FROM 
-            `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS a
-        JOIN 
-            ClosestTo AS c
-        ON 
-            a.station_id = c.link
-    """
+        """
 
     else:
         # If none of the input combinations match, return an error
