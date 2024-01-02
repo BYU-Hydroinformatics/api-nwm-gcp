@@ -13,7 +13,7 @@ paths:
       summary: Documentation for NWM Streams API
       operationId: docs
       x-google-backend:
-        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/docs
+        address: <APP_URL>/docs
       responses:
         '200':
           description: A successful response
@@ -24,7 +24,7 @@ paths:
       summary: openapi.json for NWM Streams API
       operationId: openapi-json
       x-google-backend:
-        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/openapi.json
+        address: <APP_URL>/openapi.json
       responses:
         '200':
           description: A successful response
@@ -35,7 +35,7 @@ paths:
       summary: Get forecast table contents
       operationId: return_forecast_records
       x-google-backend:
-        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/forecast
+        address: <APP_URL>/forecast
       parameters:
         - name: "forecast_type"
           in: "query"
@@ -91,7 +91,7 @@ paths:
       summary: Get analysis and assimilation table contents
       operationId: return_analysis-assim_records
       x-google-backend:
-        address: https://nwm-api-service-slyrvtmluq-uc.a.run.app/analysis-assim
+        address: <APP_URL>/analysis-assim
       parameters:
         - name: "start_time"
           in: "query"
@@ -116,6 +116,57 @@ paths:
         - name: "run_offset"
           in: "query"
           description: "Look back time from model run"
+          required: true
+          type: "string"
+        - name: "output_format"
+          in: "query"
+          description: "Output format. Options are csv and json"
+          required: true
+          type: "string"
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "Successful retrieval of data"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Response"
+        "400":
+          description: "Invalid parameters provided"
+        "401":
+          description: "Unauthorized"
+        "403":
+          description: "Forbidden"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            type: string
+  /geometry:
+    get:
+      summary: Get geometry table contents
+      operationId: return_geometry
+      x-google-backend:
+        address: <APP_URL>/geometry
+      parameters:
+        - name: "comids"
+          in: "query"
+          description: "Unique identification for stream segment"
+          required: true
+          type: "number"
+        - name: "hs_resource"
+          in: "query"
+          description: "Unique identification for HydroShare resource (with list of comids)"
+          required: true
+          type: "number"
+        - name: "lat"
+          in: "query"
+          description: "Latitude of point to select closest stream segment" 
+          required: true
+          type: "string"
+        - name: "lon"
+          in: "query"
+          description: "Longitude of point to select closest stream segment" 
           required: true
           type: "string"
         - name: "output_format"
