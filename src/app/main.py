@@ -32,7 +32,7 @@ def custom_openapi():
         description = (
             "This API provides access to data produced by the National Water Model.\n"
             "It includes endpoints for retrieving retrospective and forecast data.\n "
-            "Users can filter data by locaqtion, time, and other parameters.\n"
+            "Users can filter data by location, time, and other parameters.\n"
             "Please refer to the individual endpoint documentation for more details on how to use each function."
         ),
         routes=app.routes,
@@ -63,6 +63,7 @@ def forecast(
     """Retrieve analysis assimilation data from the National Water Model based on the provided parameters.
 
     Args:
+
         forecast_type (str): The forecast run to extract data from.
         reference_time (str, optional): The reference time for the forecast.
             If None then defaults to the latest available forecast reference time 
@@ -77,6 +78,7 @@ def forecast(
         output_format (str, optional): The output format for the forecast. Defaults to 'json'.
 
     Returns:
+
         The forecast data in the specified output format.
     """
 
@@ -189,7 +191,7 @@ def analysis_assim(
     run_offset: int = 1,
 ):
     """
-    Retrieves analysis assimilation data from the National Water Model for the specified parameters.
+    Retrieve the analysis assimilation data from the National Water Model for the specified parameters.
 
     
     Args:
@@ -269,6 +271,26 @@ def geometry(
     lon: float | None = None,
     output_format: str = 'json'
 ):
+    """Retrieve reach spatial geometry and attribute data from the National Water
+      Model based on the provided parameters.
+
+    Args:
+
+        comids (str, optional): A comma-separated list of comids for the forecast. 
+            Defaults to None.
+        hydroshare_id (str, optional): The hydroshare id with specified comids to
+            extractt the forecast. If comids is not provided, this will be used 
+            to extract comids. Defaults to None.
+        lat (float, optional): A latitude value to query using a geomtry point. 
+            Must provide lon as well if provided. Defaults to None.
+        lon (float, optional): A longitude value to query using a geomtry point. 
+            Must provide lat as well if provided. Defaults to None.
+        output_format (str, optional): The output format for the forecast. Defaults to 'json'.
+
+    Returns:
+    
+        The geometry data in the specified output format.
+    """
     # Validate input combinations
     if comids:
         # If comids are provided, use them
