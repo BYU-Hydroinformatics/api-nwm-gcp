@@ -2,11 +2,10 @@ import csv
 from datetime import datetime
 from dateutil import parser
 from io import StringIO
-import json
 import requests
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.openapi.utils import get_openapi
 from google.cloud import bigquery
 from typing import Union
@@ -413,7 +412,7 @@ def format_response(response_data, output_format):
     # Check the output format and return the corresponding response
     if output_format.lower() == 'json':
         # Return results as a JSON response
-        response = json.dumps(response_data)
+        response = JSONResponse(content=response_data)
     
     elif output_format.lower() == 'csv':
         # Return results as a CSV response
@@ -426,7 +425,12 @@ def format_response(response_data, output_format):
         # Write rows
         csv_writer.writerows(response_data)
 
-        response = csv_output.getvalue()
+        response = StreamingResponse(
+            iter([csv_output.getvalue()]),
+            media_type="text/csv"
+        )
+
+        csv_output.close()
     else:
         raise HTTPException(status_code=400, detail='Unsupported output format. Supported formats are JSON and CSV.')
     
