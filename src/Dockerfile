@@ -1,5 +1,5 @@
 # 
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # Set the current working directory to /code.
 # This is where we'll put the requirements.txt file and the app directory.
