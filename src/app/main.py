@@ -13,9 +13,9 @@ from typing import Union
 
 # constants
 FORECAST_OPTS = dict(
-    long_range = 'ciroh-water-demo.national_water_model_demo.channel_rt_long_range',
-    medium_range = 'ciroh-water-demo.national_water_model_demo.channel_rt_medium_range',
-    short_range = 'ciroh-water-demo.national_water_model_demo.channel_rt_short_range',
+    long_range = 'bigquery-public-data.national_water_model.long_range_channel_rt',
+    medium_range = 'bigquery-public-data.national_water_model.medium_range_channel_rt',
+    short_range = 'bigquery-public-data.national_water_model.short_range_channel_rt',
 )
 
 app = FastAPI()
@@ -232,7 +232,7 @@ def analysis_assim(
             streamflow,
             velocity
         FROM
-            `ciroh-water-demo.national_water_model_demo.channel_rt_analysis_assim`
+            `bigquery-public-data.national_water_model.analysis_assim_channel_rt`
         WHERE 
             feature_id IN ({", ".join(map(str, comids))})
             AND forecast_offset = {run_offset}
