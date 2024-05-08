@@ -93,6 +93,7 @@ def forecast(
         latest_reference_time_query = f"""
             SELECT MAX(reference_time) AS latest_reference_time
             FROM `{table_name}`
+            WHERE DATETIME(reference_time) >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
         """
         latest_reference_time_result = run_query(latest_reference_time_query)
 
