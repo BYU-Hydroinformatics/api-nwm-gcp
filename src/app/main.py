@@ -91,8 +91,14 @@ def forecast(
     if reference_time is None:
         # Query to get the latest reference_time
         latest_reference_time_query = f"""
-            SELECT MAX(reference_time) AS latest_reference_time
-            FROM `{table_name}`
+            SELECT 
+                MAX(reference_time) AS latest_reference_time
+            FROM 
+                `{table_name}`
+            WHERE 
+                DATETIME(reference_time) >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
+                AND feature_id = 101
+                AND ensemble = 0
         """
         latest_reference_time_result = run_query(latest_reference_time_query)
 
