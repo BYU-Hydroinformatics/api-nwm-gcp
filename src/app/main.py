@@ -306,17 +306,14 @@ def geometry(
 
         # Construct the BigQuery query to select specific columns with a JOIN statement
         query = f"""
-            SELECT *
+            SELECT 
+                *
             FROM 
-                `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS a
-            JOIN 
-                `nwm-ciroh.NWM_Streams_Tables.Routelink_CONUS_fsspec` AS b
-            ON 
-                a.station_id = b.to
+                `bigquery-public-data.national_water_model.stream_network`
             WHERE 
-                a.station_id IN ({", ".join(map(str, station_ids))})
+                station_id IN ({", ".join(map(str, station_ids))})
             ORDER BY 
-                a.station_id
+                station_id
         """
 
     elif hydroshare_id:
@@ -335,17 +332,14 @@ def geometry(
 
         # Construct the BigQuery query to select specific columns with a JOIN statement
         query = f"""
-            SELECT *
+            SELECT 
+                *
             FROM 
-                `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS a
-            JOIN 
-                `nwm-ciroh.NWM_Streams_Tables.Routelink_CONUS_fsspec` AS b
-            ON 
-                a.station_id = b.to
+                `bigquery-public-data.national_water_model.stream_network`
             WHERE 
-                a.station_id IN ({", ".join(map(str, station_ids))})
+                station_id IN ({", ".join(map(str, station_ids))})
             ORDER BY 
-                a.station_id
+                station_id
         """
     
     elif lat and lon:
@@ -355,7 +349,7 @@ def geometry(
                 streams.*,    
                 ST_DISTANCE(streams.geometry, ST_GEOGPOINT({lon}, {lat})) AS distance
             FROM
-                `nwm-ciroh.NWM_Streams_Tables.NWMApp_CONUS` AS streams
+                `bigquery-public-data.national_water_model.stream_network` AS streams
             ORDER BY distance
             LIMIT 1
         """
