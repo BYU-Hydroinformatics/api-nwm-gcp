@@ -1,7 +1,7 @@
 # api-nwm-gcp
 REST API backed by National Water Model data, developed on Google Cloud Platform. This repository contains general architecture diagram for a general understanding, but it focuses on two GCP products and their respective set up files and configurations: Cloud Functions and API Gateway.
 
-![Architecture Diagram](images/gcp_architecture_diagram.png)
+![Architecture Diagram](https://github.com/BYU-Hydroinformatics/api-nwm-gcp/blob/main/images/gcp_architecture_diagram.png)
 
 ## Infrastructure setup
 
