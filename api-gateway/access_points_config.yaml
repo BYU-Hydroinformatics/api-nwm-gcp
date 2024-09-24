@@ -13,7 +13,8 @@ paths:
       summary: Documentation for NWM Streams API
       operationId: docs
       x-google-backend:
-        address: <APP_URL>/docs
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
       responses:
         '200':
           description: A successful response
@@ -24,7 +25,8 @@ paths:
       summary: openapi.json for NWM Streams API
       operationId: openapi-json
       x-google-backend:
-        address: <APP_URL>/openapi.json
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
       responses:
         '200':
           description: A successful response
@@ -35,7 +37,8 @@ paths:
       summary: Get forecast table contents
       operationId: return_forecast_records
       x-google-backend:
-        address: <APP_URL>/forecast
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
       parameters:
         - name: "forecast_type"
           in: "query"
@@ -91,7 +94,8 @@ paths:
       summary: Get analysis and assimilation table contents
       operationId: return_analysis-assim_records
       x-google-backend:
-        address: <APP_URL>/analysis-assim
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
       parameters:
         - name: "start_time"
           in: "query"
@@ -147,7 +151,8 @@ paths:
       summary: Get geometry table contents
       operationId: return_geometry
       x-google-backend:
-        address: <APP_URL>/geometry
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
       parameters:
         - name: "comids"
           in: "query"
