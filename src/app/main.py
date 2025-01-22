@@ -28,7 +28,7 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="National Water Model API Documentation",
-        version="0.1.1",
+        version="1.1.0",
         summary="This is the OpenAPI schema for the National Water Model API.",
         description = (
             "This API provides access to data produced by the National Water Model.\n"

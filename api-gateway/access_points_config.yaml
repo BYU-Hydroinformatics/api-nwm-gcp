@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
-  title: NWM Streams API 1.1
+  title: NWM Streams API
   description: Retrieves data from NWM Dataset based on given parameters
-  version: 0.1.1
+  version: 1.1.0
 schemes:
   - https
 produces:
