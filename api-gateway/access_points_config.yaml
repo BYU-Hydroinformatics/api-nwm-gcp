@@ -7,6 +7,43 @@ schemes:
   - https
 produces:
   - application/json
+x-google-management:
+  metrics:
+    # Define a metric for forecast requests.
+    - name: "forecast-requests"
+      displayName: "Forecast requests"
+      valueType: INT64
+      metricKind: DELTA
+    # Define a metric for analysis-assim requests.
+    - name: "assim-requests"
+      displayName: "Analysis-assim requests"
+      valueType: INT64
+      metricKind: DELTA
+    # Define a metric for geometry requests.
+    - name: "geometry-requests"
+      displayName: "Geometry requests"
+      valueType: INT64
+      metricKind: DELTA
+  quota:
+    limits:
+      # Rate limit for forecast requests.
+      - name: "forecast-request-limit"
+        metric: "forecast-requests"
+        unit: "1/min/{project}"
+        values:
+          STANDARD: 1000
+      # Rate limit for analysis-assim requests.
+      - name: "assim-request-limit"
+        metric: "assim-requests"
+        unit: "1/min/{project}"
+        values:
+          STANDARD: 1000
+      # Rate limit for geometry requests.
+      - name: "geometry-request-limit"
+        metric: "geometry-requests"
+        unit: "1/min/{project}"
+        values:
+          STANDARD: 1000
 paths:
   /docs:
     get:
@@ -70,6 +107,9 @@ paths:
           description: "Output format. Options are csv and json"
           required: true
           type: "string"
+      x-google-quota:
+        metricCosts:
+          forecast-requests: 1
       security:
         - api_key: []
       responses:
@@ -127,6 +167,9 @@ paths:
           description: "Output format. Options are csv and json"
           required: true
           type: "string"
+      x-google-quota:
+        metricCosts:
+          assim-requests: 1
       security:
         - api_key: []
       responses:
@@ -179,6 +222,9 @@ paths:
           description: "Output format. Options are csv and json"
           required: true
           type: "string"
+      x-google-quota:
+        metricCosts:
+          geometry-requests: 1
       security:
         - api_key: []
       responses:
