@@ -2,15 +2,27 @@ swagger: '2.0'
 info:
   title: NWM Streams API
   description: Retrieves data from NWM Dataset based on given parameters
-  version: 1.0.0
+  version: 1.1.0
 schemes:
   - https
 produces:
   - application/json
 paths:
+  /:
+    get:
+      summary: Home for NWM API
+      operationId: home
+      x-google-backend:
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
   /docs:
     get:
-      summary: Documentation for NWM Streams API
+      summary: Documentation for NWM API
       operationId: docs
       x-google-backend:
         address: <APP_URL>
@@ -20,9 +32,10 @@ paths:
           description: A successful response
           schema:
             type: string
+
   /openapi.json:
     get:
-      summary: openapi.json for NWM Streams API
+      summary: openapi.json for NWM API
       operationId: openapi-json
       x-google-backend:
         address: <APP_URL>
@@ -198,6 +211,60 @@ paths:
           description: "Internal Server Error"
           schema:
             type: string
+
+  /return-period:
+    get:
+      summary: Get flood return-period contents
+      operationId: return_periods
+      x-google-backend:
+        address: <APP_URL>
+        path_translation: APPEND_PATH_TO_ADDRESS
+      parameters:
+        - name: "comids"
+          in: "query"
+          description: "Unique identification for stream segment"
+          required: true
+          type: "number"
+        - name: "hydoshare_id"
+          in: "query"
+          description: "Unique identification for HydroShare resource (with list of comids)"
+          required: true
+          type: "number"
+        - name: "return_periods"
+          in: "query"
+          description: "Extraction of a subset of available return periods" 
+          required: false
+          type: "string"
+        - name: "output_format"
+          in: "query"
+          description: "Output format. Options are csv and json"
+          required: true
+          type: "string"
+        - name: "order_by_comid"
+          in: "query"
+          description: "Ordering the records in the resulting data table" 
+          required: false
+          type: "boolean"
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "Successful retrieval of data"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Response"
+        "400":
+          description: "Invalid parameters provided"
+        "401":
+          description: "Unauthorized"
+        "403":
+          description: "Forbidden"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            type: string
+
 securityDefinitions:
   api_key:
     type: "apiKey"
