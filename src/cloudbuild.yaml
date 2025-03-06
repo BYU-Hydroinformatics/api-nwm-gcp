@@ -4,13 +4,13 @@ steps:
   args: 
   - 'build'
   - '-t'
-  - 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+  - 'us-central1-docker.pkg.dev/bigqueryapi-430214/nwm-api-repo/nwm-api-image'
   - '.'
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: 
   - 'push'
-  - 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+  - 'us-central1-docker.pkg.dev/bigqueryapi-430214/nwm-api-repo/nwm-api-image'
 # Deploy container image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
@@ -19,7 +19,7 @@ steps:
   - 'deploy'
   - 'nwm-api-service'
   - '--image'
-  - 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+  - 'us-central1-docker.pkg.dev/bigqueryapi-430214/nwm-api-repo/nwm-api-image'
   - '--region'
   - 'us-central1'
   - '--memory'
@@ -33,6 +33,6 @@ steps:
   - '--timeout'
   - '30s'
   - '--service-account'
-  - 'nwm-api-controller@kmarkert-personal.iam.gserviceaccount.com'
+  - 'nwm-api-controller@bigqueryapi-430214.iam.gserviceaccount.com'
 images:
-- 'us-central1-docker.pkg.dev/kmarkert-personal/nwm-api-repo/nwm-api-image'
+- 'us-central1-docker.pkg.dev/bigqueryapi-430214/nwm-api-repo/nwm-api-image'
